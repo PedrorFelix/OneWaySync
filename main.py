@@ -25,11 +25,9 @@ def sync_additions(source_path, replica_path, logfile):
                 os.makedirs(replicaEntry)
                 sync_additions(sourceEntry, replicaEntry, logfile)
         else:
-            if not os.path.exists(replicaEntry) or not filecmp(sourceEntry, replicaEntry):
+            if not os.path.exists(replicaEntry) or not filecmp.cmp(sourceEntry, replicaEntry):
                 log(logfile, "Copying " + item + " into " + replica_path)
                 shutil.copy2(sourceEntry, replicaEntry) #copy2 attempts to perserve metadata
-
-    log(logfile, "Finished adding new content to replica folder")
 
 def sync_deletions(source_path, replica_path, logfile):
     for item in os.listdir(replica_path):
@@ -44,13 +42,13 @@ def sync_deletions(source_path, replica_path, logfile):
                 log(logfile, "Deleting File" + item + " from " + replica_path)
                 os.remove(replicaEntry)
 
-    log(logfile, "Finished cleaning deleted content from replica folder")
-
 def sync(source_path, replica_path, file):
     log(file, "Beggining Synchonization by adding new content to replica folder")
     sync_additions(source_path, replica_path, file)
+    log(file, "Finished adding new content to replica folder")
     log(file, "Cleaning deleted source files from replica folder")
     sync_deletions(source_path, replica_path, file)
+    log(file, "Finished cleaning deleted content from replica folder")
     log(file, "Finished Synchonization")
 
 def main():
@@ -61,17 +59,21 @@ def main():
     parser.add_argument("-f", "--frequency", help="frequency with witch the replication must occur", required=True)
     args = parser.parse_args()
 
+    source = args.source
+    replica = args.replica
+    frequency = args.frequency
+
     print(f"arguments:\nsource: {args.source},\nreplica: {args.replica},\nlog: {args.log},\nfrequency: {args.frequency}")
 
     try:
-        frequency = int(args.frequency)
+        frequency = int(frequency)
     except ValueError:
         print("Invalid Frequency (Must be a numeric value)")
         exit(1)
 
-    if os.path.exists(args.source):
+    if os.path.exists(source):
         source = args.source
-        if os.path.exists(args.replica):
+        if os.path.exists(replica):
             replica = args.replica
     else:
         print("Source folder does not exist")
@@ -81,14 +83,15 @@ def main():
         logfile = args.log
     else:
         print("Log file given is not valid")
-        answer = input("Should a log file be created at replica folder? (y/n)").strip().lower()
-        if answer == 'y':
-            print(f"Creating a log file at {args.replica}")
-            logfile= os.path.join(replica, "logfile.txt")
-            Path(logfile).touch()
-        else:
-            print("Please insert a valid log file")
-            exit(1)
+        #answer = input("Should a log file be created at replica folder? (y/n)\n").strip().lower()
+        #if answer == 'y':
+        #    print(f"Creating a log file at {replica}")
+        #    logfile= os.path.join(replica, "logfile.txt")
+        #    with open(logfile, 'w') as file:
+        #        file.write('Log file creation\n')
+        #else:
+        #    print("Please insert a valid log file")
+        exit(1)
 
     try:
         while True:
