@@ -24,9 +24,12 @@ def sync_additions(source_path, replica_path):
                 os.makedirs(replicaEntry)
                 sync_additions(sourceEntry, replicaEntry)
         else:
-            if not os.path.exists(replicaEntry) or not filecmp.cmp(sourceEntry, replicaEntry):
+            if not os.path.exists(replicaEntry):
                 log("Copying " + item + " into " + replica_path)
                 shutil.copy2(sourceEntry, replicaEntry) #copy2 attempts to perserve metadata
+            elif not filecmp.cmp(sourceEntry, replicaEntry):
+                log("Updating " + item + " into " + replica_path)
+                shutil.copy2(sourceEntry, replicaEntry)
 
 def sync_deletions(source_path, replica_path):
     for item in os.listdir(replica_path):
@@ -80,19 +83,19 @@ def main():
     if os.path.isfile(args.log):
         global logfile 
         logfile_path = Path(args.log)
-        logfile = open(logfile_path,'w')
     else:
         print("Log file given is not valid")
         exit(1)
 
     try:
         while True:
+            logfile = open(logfile_path,'a')
             print("Running the Script. Press Ctrl+C to stop")
             sync(source, replica)
+            logfile.close()
             sleep(frequency)
     except KeyboardInterrupt:
         print("Script Stopped")
-        logfile.close()
         exit(0)
 
 if __name__ == "__main__":
