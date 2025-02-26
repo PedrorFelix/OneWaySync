@@ -7,49 +7,49 @@ from pathlib import Path
 import filecmp
 import shutil
 
-def log(file, message):
+def log(message):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     final_message = timestamp + " - " + message + "\n"
-    log = Path(file)
-    log.open('w').write(final_message)
+    logfile.write(final_message)
     print(final_message)
 
-def sync_additions(source_path, replica_path, logfile):
+def sync_additions(source_path, replica_path):
     for item in os.listdir(source_path):
         sourceEntry = os.path.join(source_path, item)
         replicaEntry = os.path.join(replica_path, item)
 
         if os.path.isdir(sourceEntry):
             if  not os.path.exists(replicaEntry):
-                log(logfile, "Creating " + item + " at " + replica_path)
+                log("Creating " + item + " at " + replica_path)
                 os.makedirs(replicaEntry)
-                sync_additions(sourceEntry, replicaEntry, logfile)
+                sync_additions(sourceEntry, replicaEntry)
         else:
             if not os.path.exists(replicaEntry) or not filecmp.cmp(sourceEntry, replicaEntry):
-                log(logfile, "Copying " + item + " into " + replica_path)
+                log("Copying " + item + " into " + replica_path)
                 shutil.copy2(sourceEntry, replicaEntry) #copy2 attempts to perserve metadata
 
-def sync_deletions(source_path, replica_path, logfile):
+def sync_deletions(source_path, replica_path):
     for item in os.listdir(replica_path):
         sourceEntry = os.path.join(source_path, item)
         replicaEntry = os.path.join(replica_path, item)
 
         if not os.path.exists(sourceEntry):
             if os.path.isdir(sourceEntry):
-                log(logfile, "Deleting Folder" + item + " from " + replica_path)
+                log("Deleting Folder " + item + " from " + replica_path)
                 shutil.rmtree(replicaEntry)
             else:
-                log(logfile, "Deleting File" + item + " from " + replica_path)
+                log("Deleting File " + item + " from " + replica_path)
                 os.remove(replicaEntry)
 
-def sync(source_path, replica_path, file):
-    log(file, "Beggining Synchonization by adding new content to replica folder")
-    sync_additions(source_path, replica_path, file)
-    log(file, "Finished adding new content to replica folder")
-    log(file, "Cleaning deleted source files from replica folder")
-    sync_deletions(source_path, replica_path, file)
-    log(file, "Finished cleaning deleted content from replica folder")
-    log(file, "Finished Synchonization")
+def sync(source_path, replica_path):
+    log("Beggining Synchonization by adding new content to replica folder")
+    sync_additions(source_path, replica_path)
+    log("Finished adding new content to replica folder")
+    log("Cleaning deleted source files from replica folder")
+    sync_deletions(source_path, replica_path)
+    log("Finished cleaning deleted content from replica folder")
+    log("Finished Synchonization")
+    
 
 def main():
     parser = argparse.ArgumentParser(description="Replicates a source folder frequently")
@@ -62,8 +62,6 @@ def main():
     source = args.source
     replica = args.replica
     frequency = args.frequency
-
-    print(f"arguments:\nsource: {args.source},\nreplica: {args.replica},\nlog: {args.log},\nfrequency: {args.frequency}")
 
     try:
         frequency = int(frequency)
@@ -80,26 +78,21 @@ def main():
         exit(1)
 
     if os.path.isfile(args.log):
-        logfile = args.log
+        global logfile 
+        logfile_path = Path(args.log)
+        logfile = open(logfile_path,'w')
     else:
         print("Log file given is not valid")
-        #answer = input("Should a log file be created at replica folder? (y/n)\n").strip().lower()
-        #if answer == 'y':
-        #    print(f"Creating a log file at {replica}")
-        #    logfile= os.path.join(replica, "logfile.txt")
-        #    with open(logfile, 'w') as file:
-        #        file.write('Log file creation\n')
-        #else:
-        #    print("Please insert a valid log file")
         exit(1)
 
     try:
         while True:
             print("Running the Script. Press Ctrl+C to stop")
-            sync(source, replica, logfile)
+            sync(source, replica)
             sleep(frequency)
     except KeyboardInterrupt:
         print("Script Stopped")
+        logfile.close()
         exit(0)
 
 if __name__ == "__main__":
