@@ -1,0 +1,9 @@
+# ==============================================================================
+# OneWaySync
+# ==============================================================================
+# This project relies entirely on the Python Standard Library.
+# No third-party packages are required to run this application.
+#
+# Requirements:
+# - Python >= 3.8
+# ==============================================================================

@@ -1,6 +1,5 @@
 # OneWaySync
 
-
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -18,11 +17,24 @@ A light python CLI tool that was writen in order to synchronize two folders: sou
 ### User Privacy
 - No 3rd party shady dependencies. User data is kept completely in user control.
 
----
+
 ## Requirements
 - **OS:** Linux, Windows, MacOS
 - **Pyhton:** Version 3.8+
----
+
+## Instalation
+
+No external installation is required! This utility runs completely on Python's native libraries.
+
+```bash
+# Clone the repository
+git clone https://github.com/PedrorFelix/OneWaySync.git
+cd OneWaySync
+
+# verify your Python version (requires 3.8+)
+python --version
+```
+
 ## Usage
 ### Comand Line Parameters
 
