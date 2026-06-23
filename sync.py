@@ -20,15 +20,15 @@ def sync_additions(source_path, replica_path):
 
         if os.path.isdir(sourceEntry):
             if  not os.path.exists(replicaEntry):
-                log("Creating " + item + " at " + replica_path)
+                log("ACTION - Creating " + item + " at " + replica_path + ".")
                 os.makedirs(replicaEntry)
                 sync_additions(sourceEntry, replicaEntry)
         else:
             if not os.path.exists(replicaEntry):
-                log("Copying " + item + " into " + replica_path)
+                log("ACTION - Copying " + item + " into " + replica_path + ".")
                 shutil.copy2(sourceEntry, replicaEntry) #copy2 attempts to perserve metadata
             elif not filecmp.cmp(sourceEntry, replicaEntry):
-                log("Updating " + item + " into " + replica_path)
+                log("ACTION - Updating " + item + " into " + replica_path + ".")
                 shutil.copy2(sourceEntry, replicaEntry)
 
 def sync_deletions(source_path, replica_path):
@@ -38,20 +38,20 @@ def sync_deletions(source_path, replica_path):
 
         if not os.path.exists(sourceEntry):
             if os.path.isdir(sourceEntry):
-                log("Deleting Folder " + item + " from " + replica_path)
+                log("ACTION - Deleting Folder " + item + " from " + replica_path + ".")
                 shutil.rmtree(replicaEntry)
             else:
-                log("Deleting File " + item + " from " + replica_path)
+                log("ACTION - Deleting File " + item + " from " + replica_path + ".")
                 os.remove(replicaEntry)
 
 def sync(source_path, replica_path):
-    log("Beggining Synchonization by adding new content to replica folder")
+    log("INFO - Synchronization Started.")
     sync_additions(source_path, replica_path)
-    log("Finished adding new content to replica folder")
-    log("Cleaning deleted source files from replica folder")
+    log("INFO - New content added to replica folder.")
+    log("INFO - Cleaning replica folder from removed content.")
     sync_deletions(source_path, replica_path)
-    log("Finished cleaning deleted content from replica folder")
-    log("Finished Synchonization")
+    log("INFO - Cleaning finished.")
+    log("INFO - Synchronization Finished, waiting for next run.")
     
 
 def main():
@@ -69,7 +69,7 @@ def main():
     try:
         frequency = int(frequency)
     except ValueError:
-        print("Invalid Frequency (Must be a numeric value)")
+        print("Invalid Frequency (Must be a numeric value).")
         exit(1)
 
     if os.path.exists(source):
@@ -77,25 +77,25 @@ def main():
         if os.path.exists(replica):
             replica = args.replica
     else:
-        print("Source folder does not exist")
+        print("Source folder does not exist.")
         exit(1)
 
     if os.path.isfile(args.log):
         global logfile 
         logfile_path = Path(args.log)
     else:
-        print("Log file given is not valid")
+        print("Log file given is not valid.")
         exit(1)
 
     try:
         while True:
             logfile = open(logfile_path,'a')
-            print("Running the Script. Press Ctrl+C to stop")
+            print("Running the Script. Press Ctrl+C to stop.")
             sync(source, replica)
             logfile.close()
             sleep(frequency)
     except KeyboardInterrupt:
-        print("Script Stopped")
+        print("Script Stopped.")
         exit(0)
 
 if __name__ == "__main__":
