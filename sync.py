@@ -26,7 +26,7 @@ def sync_additions(source_path, replica_path):
         else:
             if not os.path.exists(replicaEntry):
                 log("ACTION - Copying " + item + " into " + replica_path + ".")
-                shutil.copy2(sourceEntry, replicaEntry) #copy2 attempts to perserve metadata
+                shutil.copy2(sourceEntry, replicaEntry) #copy2 attempts to preserve metadata
             elif not filecmp.cmp(sourceEntry, replicaEntry):
                 log("ACTION - Updating " + item + " into " + replica_path + ".")
                 shutil.copy2(sourceEntry, replicaEntry)
@@ -37,7 +37,7 @@ def sync_deletions(source_path, replica_path):
         replicaEntry = os.path.join(replica_path, item)
 
         if not os.path.exists(sourceEntry):
-            if os.path.isdir(sourceEntry):
+            if os.path.isdir(replicaEntry):
                 log("ACTION - Deleting Folder " + item + " from " + replica_path + ".")
                 shutil.rmtree(replicaEntry)
             else:
@@ -59,7 +59,7 @@ def main():
     parser.add_argument("-s", "--source", help="Path of the folder to be replicated", required=True)
     parser.add_argument("-r", "--replica", help="Path of the replica folder", required=True)
     parser.add_argument("-l", "--log", help="Path of the log file", required=True)
-    parser.add_argument("-f", "--frequency", help="frequency with witch the replication must occur", required=True)
+    parser.add_argument("-f", "--frequency", help="frequency with which the replication must occur", required=True)
     args = parser.parse_args()
 
     source = args.source
@@ -72,10 +72,12 @@ def main():
         print("Invalid Frequency (Must be a numeric value).")
         exit(1)
 
-    if os.path.exists(source):
-        source = args.source
-        if os.path.exists(replica):
-            replica = args.replica
+    if not os.path.exists(source):
+        print("Source folder does not exist.")
+        exit(1)
+    if not os.path.exists(replica):
+        print("Replica folder not found, creating new folder.")
+        os.makedirs(replica)
     else:
         print("Source folder does not exist.")
         exit(1)

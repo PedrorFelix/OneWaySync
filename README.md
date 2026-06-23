@@ -3,7 +3,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A light python CLI tool that was writen in order to synchronize two folders: source and replica. 
+A light python CLI tool that was written in order to synchronize two folders: source and replica. 
 
 ### Full Folder Replication
 - The program maintains a full, identical copy of a designated source folder at a destination folder.
@@ -15,14 +15,14 @@ A light python CLI tool that was writen in order to synchronize two folders: sou
 - Logs are kept in user specified files and cli, allowing complete transparency.
 
 ### User Privacy
-- No 3rd party shady dependencies. User data is kept completely in user control.
+- No third-party dependencies, runs entirely on Python's standard library. User data is kept completely in user control.
 
 
 ## Requirements
 - **OS:** Linux, Windows, MacOS
-- **Pyhton:** Version 3.8+
+- **Python:** Version 3.8+
 
-## Instalation
+## Installation
 
 No external installation is required! This utility runs completely on Python's native libraries.
 
@@ -36,7 +36,7 @@ python --version
 ```
 
 ## Usage
-### Comand Line Parameters
+### Command Line Parameters
 
 | Short | Long | Description | Required |
 | :--- | :--- | :--- | :--- |
