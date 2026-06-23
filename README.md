@@ -36,5 +36,5 @@ A light python CLI tool that was writen in order to synchronize two folders: sou
 ### Example
 
 ```bash
-python python sync.py -s /path/to/source/folder -r /path/to/replica/folder -l /path/to/log/file.txt -f 60
+python sync.py -s /path/to/source/folder -r /path/to/replica/folder -l /path/to/log/file.txt -f 60
 ```
