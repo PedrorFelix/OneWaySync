@@ -7,51 +7,51 @@ from pathlib import Path
 import filecmp
 import shutil
 
-def log(message):
+def log(message, logfile):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     final_message = timestamp + " - " + message + "\n"
     logfile.write(final_message)
     print(final_message)
 
-def sync_additions(source_path, replica_path):
+def sync_additions(source_path, replica_path, logfile):
     for item in os.listdir(source_path):
         sourceEntry = os.path.join(source_path, item)
         replicaEntry = os.path.join(replica_path, item)
 
         if os.path.isdir(sourceEntry):
             if  not os.path.exists(replicaEntry):
-                log("ACTION - Creating " + item + " at " + replica_path + ".")
+                log("ACTION - Creating " + item + " at " + replica_path + ".", logfile)
                 os.makedirs(replicaEntry)
-                sync_additions(sourceEntry, replicaEntry)
+            sync_additions(sourceEntry, replicaEntry, logfile)
         else:
             if not os.path.exists(replicaEntry):
-                log("ACTION - Copying " + item + " into " + replica_path + ".")
+                log("ACTION - Copying " + item + " into " + replica_path + ".", logfile)
                 shutil.copy2(sourceEntry, replicaEntry) #copy2 attempts to preserve metadata
-            elif not filecmp.cmp(sourceEntry, replicaEntry):
-                log("ACTION - Updating " + item + " into " + replica_path + ".")
+            elif not filecmp.cmp(sourceEntry, replicaEntry, shallow=False):
+                log("ACTION - Updating " + item + " into " + replica_path + ".", logfile)
                 shutil.copy2(sourceEntry, replicaEntry)
 
-def sync_deletions(source_path, replica_path):
+def sync_deletions(source_path, replica_path, logfile):
     for item in os.listdir(replica_path):
         sourceEntry = os.path.join(source_path, item)
         replicaEntry = os.path.join(replica_path, item)
 
         if not os.path.exists(sourceEntry):
             if os.path.isdir(replicaEntry):
-                log("ACTION - Deleting Folder " + item + " from " + replica_path + ".")
+                log("ACTION - Deleting Folder " + item + " from " + replica_path + ".", logfile)
                 shutil.rmtree(replicaEntry)
             else:
-                log("ACTION - Deleting File " + item + " from " + replica_path + ".")
+                log("ACTION - Deleting File " + item + " from " + replica_path + ".", logfile)
                 os.remove(replicaEntry)
 
-def sync(source_path, replica_path):
-    log("INFO - Synchronization Started.")
-    sync_additions(source_path, replica_path)
-    log("INFO - New content added to replica folder.")
-    log("INFO - Cleaning replica folder from removed content.")
-    sync_deletions(source_path, replica_path)
-    log("INFO - Cleaning finished.")
-    log("INFO - Synchronization Finished, waiting for next run.")
+def sync(source_path, replica_path, logfile):
+    log("INFO - Synchronization Started.", logfile)
+    sync_additions(source_path, replica_path, logfile)
+    log("INFO - New content added to replica folder.", logfile)
+    log("INFO - Cleaning replica folder from removed content.", logfile)
+    sync_deletions(source_path, replica_path, logfile)
+    log("INFO - Cleaning finished.", logfile)
+    log("INFO - Synchronization Finished, waiting for next run.", logfile)
     
 
 def main():
@@ -78,23 +78,17 @@ def main():
     if not os.path.exists(replica):
         print("Replica folder not found, creating new folder.")
         os.makedirs(replica)
-    else:
-        print("Source folder does not exist.")
-        exit(1)
 
-    if os.path.isfile(args.log):
-        global logfile 
-        logfile_path = Path(args.log)
-    else:
-        print("Log file given is not valid.")
+    logfile_path = Path(args.log)
+    if not logfile_path.parent.exists():
+        print("Log file path is not valid, directory does not exist.")
         exit(1)
 
     try:
         while True:
-            logfile = open(logfile_path,'a')
             print("Running the Script. Press Ctrl+C to stop.")
-            sync(source, replica)
-            logfile.close()
+            with open(logfile_path, 'a') as logfile:
+                sync(source, replica, logfile)
             sleep(frequency)
     except KeyboardInterrupt:
         print("Script Stopped.")
